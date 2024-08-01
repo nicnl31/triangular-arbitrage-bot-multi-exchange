@@ -1,23 +1,20 @@
-import ccxt.async_support as ccxt
-import os
-from dotenv import load_dotenv
 import asyncio
-from telegram import Bot
-import pandas as pd
-import math
-from telegram import Update
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
-import time 
-from datetime import datetime
-import os.path
-import traceback
-from decimal import Decimal
 import logging
-from decimal import ROUND_DOWN,ROUND_UP
-import asyncio
+import os
+import os.path
+import time
+import traceback
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
-import numpy as np
+from decimal import ROUND_DOWN, ROUND_UP
 
+import ccxt.async_support as ccxt
+import numpy as np
+import pandas as pd
+from dotenv import load_dotenv
+from telegram import Bot
+from telegram import Update
+from telegram.ext import Updater, MessageHandler, filters, CallbackContext
 
 logging.basicConfig(filename='arbitrage.log', level=logging.INFO, format='%(asctime)s %(message)s')
 start_time = time.time()
@@ -451,7 +448,7 @@ async def main():
     dispatcher = updater.dispatcher
     
     # Add a command handler for the /stop command
-    dispatcher.add_handler(MessageHandler(Filters.regex('^/stop$'), stop_command))
+    dispatcher.add_handler(MessageHandler(filters.Regex('^/stop$'), stop_command))
     
     # Start the updater
     updater.start_polling()
