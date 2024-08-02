@@ -14,7 +14,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from telegram import Bot
 from telegram import Update
-from telegram.ext import Updater, MessageHandler, filters, CallbackContext
+from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
 
 logging.basicConfig(filename='arbitrage.log', level=logging.INFO, format='%(asctime)s %(message)s')
 start_time = time.time()
@@ -85,8 +85,18 @@ def stop_command(update: Update, context: CallbackContext):
 
 
 # Function for executing trades
-async def execute_trade(exchange, first_symbol, second_symbol, third_symbol, tickers, initial_amount, fee, first_tick_size, second_tick_size, third_tick_size):
-
+async def execute_trade(
+        exchange, 
+        first_symbol, 
+        second_symbol, 
+        third_symbol, 
+        tickers, 
+        initial_amount, 
+        fee, 
+        first_tick_size, 
+        second_tick_size, 
+        third_tick_size
+):
     # Use adjusted trades (including fee)
     first_price = Decimal(tickers[first_symbol]['ask'])
     first_trade = (initial_amount / first_price) * (1 - Decimal(fee))
@@ -203,7 +213,15 @@ async def calculate_price_impact(exchange, symbols, order_sizes, sides):
     return price_impacts
 
 #Function for finding triangular arbitrage opportunities for each exchange
-async def find_triangular_arbitrage_opportunities(exchange, markets, tickers, exchange_name, fee, initial_amount ):    
+async def find_triangular_arbitrage_opportunities(
+        exchange,
+        markets, 
+        tickers, 
+        exchange_name, 
+        fee, 
+        initial_amount,
+        profit_threshold: float = 0.04
+):    
     
     logging.info('Finding arbitrage opportunities.')
     # Read existing trades from CSV file
@@ -311,7 +329,7 @@ async def find_triangular_arbitrage_opportunities(exchange, markets, tickers, ex
                 opportunities = []
 
                 
-                if profit_percentage > 0.3:
+                if profit_percentage >= profit_threshold:
                     logging.info(f'Arbitrage opportunity found. Checking liquidity on {exchange_name}...')
                     print(f'\rArbitrage opportunities found, checking liquidity', end='\r')
                     
@@ -448,7 +466,7 @@ async def main():
     dispatcher = updater.dispatcher
     
     # Add a command handler for the /stop command
-    dispatcher.add_handler(MessageHandler(filters.Regex('^/stop$'), stop_command))
+    dispatcher.add_handler(MessageHandler(Filters.regex('^/stop$'), stop_command))
     
     # Start the updater
     updater.start_polling()
